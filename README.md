@@ -95,6 +95,58 @@ Le BMP280 est un capteur de pression et température développé par Bosch (page
 
 ## 2.2. Setup du STM32
 ### Configuration du STM32
+
+1. Liaison I²C
+
+- Utilisation de l'I²C1
+- Broches : PB8 (SCL) et PB9 (SDA)
+- Ces broches sont compatibles avec l'empreinte Arduino, ce qui facilite l'utilisation des capteurs externes.
+
+2. Liaison UART vers PC (USB)
+
+- Utilisation de USART2
+- Broches : PA2 (TX) et PA3 (RX)
+- Cette liaison permet de communiquer avec le PC via le port USB de la Nucleo, notamment pour afficher les données avec printf.
+
+3. Liaison UART pour communication avec Raspberry Pi (TP2)
+
+- Utilisation de l'UART4
+- Broches : PA0 (TX) et PA1 (RX)
+- Permet une communication distincte avec le Raspberry Pi.
+
+4. Liaison CAN (TP4)
+
+- Utilisation du CAN1
+- Broches : PA12 (TX) et PA11 (RX)
+
+
+## 2.3. Communication I²C
+### Primitives I²C sous STM32_HAL
+L'API HAL (Hardware Abstraction Layer) fournit par ST propose entre autres 2 primitives permettant d'interagir avec le bus I²C en mode Master:
+```c
+HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+
+HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+```
+où:
+- `I2C_HandleTypeDef hi2c` : structure stockant les informations du contrôleur I²C
+- `uint16_t DevAddress` : adresse I³C du périphérique Slave avec lequel on souhaite interagir.
+- `uint8_t *pData` : buffer de données
+- `uint16_t Size` : taille du buffer de données
+- `uint32_t Timeout` : peut prendre la valeur HAL_MAX_DELAY
+
+### Communication avec le BMP280
+
+L'identification du BMP280 consiste en la lecture du registre ID
+
+En I²C, la lecture se déroule de la manière suivante:
+
+- envoyer l'adresse du registre ID
+- recevoir 1 octet correspondant au contenu du registre
+
+Vérifiez que le contenu du registre correspond bien à la datasheet.
+Vérifiez à l'oscilloscope que la formes des trames I²C est conforme.
+
 On suit les instructions pour que printf envoie les caractères à l'huart2 sans oublier d'inclure stdio.h. Une fois cela fait, on choisit pour améliorer la lisibiliter et la simplicité du code de créer un driver bmp280. 
 
 On implémente d'abord les fonctions qui permettent de lire (BMP280_ReadRegisters) et d'écrire (BMP280_WriteRegister) dans les registres du capteur. 
@@ -141,31 +193,3 @@ HAL_StatusTypeDef BMP280_Init(void) {
 <img width="413" height="273" alt="1" src="https://github.com/user-attachments/assets/b6ee9c9f-4051-4d2c-9e29-bcd2c1e2056f" />
 
 0x58 est bien la valeur attendue. 
-
-
-## 2.3. Communication I²C
-### Primitives I²C sous STM32_HAL
-L'API HAL (Hardware Abstraction Layer) fournit par ST propose entre autres 2 primitives permettant d'interagir avec le bus I²C en mode Master:
-```c
-HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-
-HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-```
-où:
-- `I2C_HandleTypeDef hi2c` : structure stockant les informations du contrôleur I²C
-- `uint16_t DevAddress` : adresse I³C du périphérique Slave avec lequel on souhaite interagir.
-- `uint8_t *pData` : buffer de données
-- `uint16_t Size` : taille du buffer de données
-- `uint32_t Timeout` : peut prendre la valeur HAL_MAX_DELAY
-
-### Communication avec le BMP280
-
-L'identification du BMP280 consiste en la lecture du registre ID
-
-En I²C, la lecture se déroule de la manière suivante:
-
-- envoyer l'adresse du registre ID
-- recevoir 1 octet correspondant au contenu du registre
-
-Vérifiez que le contenu du registre correspond bien à la datasheet.
-Vérifiez à l'oscilloscope que la formes des trames I²C est conforme.
