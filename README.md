@@ -104,11 +104,21 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevA
 
 HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 ```
-
 où:
-
 - `I2C_HandleTypeDef hi2c` : structure stockant les informations du contrôleur I²C
 - `uint16_t DevAddress` : adresse I³C du périphérique Slave avec lequel on souhaite interagir.
 - `uint8_t *pData` : buffer de données
 - `uint16_t Size` : taille du buffer de données
 - `uint32_t Timeout` : peut prendre la valeur HAL_MAX_DELAY
+
+### Communication avec le BMP280
+
+L'identification du BMP280 consiste en la lecture du registre ID
+
+En I²C, la lecture se déroule de la manière suivante:
+
+- envoyer l'adresse du registre ID
+- recevoir 1 octet correspondant au contenu du registre
+
+Vérifiez que le contenu du registre correspond bien à la datasheet.
+Vérifiez à l'oscilloscope que la formes des trames I²C est conforme.
