@@ -135,6 +135,8 @@ où:
 - `uint16_t Size` : taille du buffer de données
 - `uint32_t Timeout` : peut prendre la valeur HAL_MAX_DELAY
 
+---
+
 ### Communication avec le BMP280
 
 L'identification du BMP280 consiste en la lecture du registre ID
@@ -193,3 +195,110 @@ HAL_StatusTypeDef BMP280_Init(void) {
 <img width="413" height="273" alt="1" src="https://github.com/user-attachments/assets/b6ee9c9f-4051-4d2c-9e29-bcd2c1e2056f" />
 
 0x58 est bien la valeur attendue. 
+
+---
+
+### Calcul des températures et des pression compensées
+
+On récupère les valeur non-compensées :
+```c
+// ---- Lecture des coefficients de calibration ----
+HAL_StatusTypeDef BMP280_ReadCalibration(void)
+{
+    uint8_t buf[24];
+    HAL_StatusTypeDef ret;
+
+    ret = BMP280_ReadRegisters(&hi2c1, BMP280_REG_CALIB_START, buf, 24);
+    if (ret != HAL_OK) return ret;
+
+    dig_T1 = (buf[1] << 8) | buf[0];
+    dig_T2 = (buf[3] << 8) | buf[2];
+    dig_T3 = (buf[5] << 8) | buf[4];
+
+    dig_P1 = (buf[7] << 8) | buf[6];
+    dig_P2 = (buf[9] << 8) | buf[8];
+    dig_P3 = (buf[11] << 8) | buf[10];
+    dig_P4 = (buf[13] << 8) | buf[12];
+    dig_P5 = (buf[15] << 8) | buf[14];
+    dig_P6 = (buf[17] << 8) | buf[16];
+    dig_P7 = (buf[19] << 8) | buf[18];
+    dig_P8 = (buf[21] << 8) | buf[20];
+    dig_P9 = (buf[23] << 8) | buf[22];
+
+    return HAL_OK;
+}
+```
+
+- buf reçoit `24` octets du BMP280, à partir de l’adresse `0x88`.
+- Ces `24` octets contiennent tous les coefficients de température et pression.
+- On utilise `HAL_I2C_Master_Transmit + HAL_I2C_Master_Receive` dans `BMP280_ReadRegisters`.
+- Chaque coefficient est stocké sur 2 octets (little-endian → LSB d’abord, puis MSB)
+- On décale le MSB de `8 bits` à gauche et on fait un OU logique avec le LSB.
+- Cela reconstitue la valeur entière du coefficient.
+- Pareil pour la pression : `dig_P1` à `dig_P9`.
+- On les stocke en globale, pour que les fonctions de compensation puissent les utiliser directement.
+- Sans ces coefficients, la compensation de température/pression ne peut pas fonctionner correctement.
+- Si tout se passe bien, on retourne `HAL_OK`.
+- Si l’I2C a échoué, on retourne le code d’erreur I2C (HAL_StatusTypeDef).
+
+---
+On les récupèrent ensuite et on lit 6 octets au total :
+
+- 3 octets pour la pression (MSB, LSB, XLSB)
+- 3 octets pour la température (MSB, LSB, XLSB)
+
+Puis lecture I2C
+```c
+ret = BMP280_ReadRegisters(&hi2c1, BMP280_REG_PRESS_MSB, buffer, 6);
+```
+
+- `BMP280_REG_PRESS_MSB = 0xF7`
+- L’adresse est le premier registre de la pression.
+- Le BMP280 renvoie en séquence :
+
+Press MSB, Press LSB, Press XLSB, Temp MSB, Temp LSB, Temp XLSB
+
+Chaque mesure est sur 20 bits : MSB[7:0], LSB[7:0], XLSB[7:4]
+- `buffer[0] << 12` → les 8 bits de MSB deviennent les bits 19:12
+- `buffer[1] << 4` → les 8 bits de LSB deviennent bits 11:4
+- `buffer[2] >> 4` → les 4 bits de XLSB deviennent bits 3:0
+
+---
+
+Puis on applique les compensations
+
+```c
+ret = BMP280_ReadRaw(&raw_T, &raw_P);
+```
+
+- Appelle la fonction ReadRaw() que nous avons expliquée.
+- `raw_T` et `raw_P` sont les valeurs `20 bits` non compensées du capteur.
+
+```c
+*temperature_100 = bmp280_compensate_T_int32(raw_T);
+*pressure_100    = bmp280_compensate_P_int32(raw_P);
+```
+
+- Ces fonctions utilisent les coefficients de calibration lus auparavant.
+- Résultat : temperature_100 en centi-degrés (ex. 25,34 °C → 2534)
+- pressure_100 en Pa (ex. 101325 Pa → 101325)
+
+```c
+int32_t temp100;
+uint32_t press100;
+
+if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+{
+    printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
+           temp100 / 100, temp100 % 100,
+           press100 / 100, press100 % 100);
+}
+```
+
+- Diviser par 100 pour la partie entière de la température
+- Modulo 100 pour la partie décimale
+- Même principe pour la pression (affichage en hPa)
+
+Et on obtient comme résultat :
+
+![Résultat I2C](./Documents/resultatI2C.png)
