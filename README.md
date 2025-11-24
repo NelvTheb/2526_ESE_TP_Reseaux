@@ -28,7 +28,7 @@ Le BMP280 est un capteur de pression et température développé par Bosch (page
 
 À partir de la datasheet du BMP280, identifiez les éléments suivants:
 
-- L'adresse pour communiquer du BMP280 est `0x77`.
+- L'adresse pour communiquer avec le BMP280 est `0x77`.
 
 - les adresses I²C possibles pour ce composant.
     - Elles vont de `0xD0` à `OxFC`.
@@ -92,3 +92,23 @@ Le BMP280 est un capteur de pression et température développé par Bosch (page
         return p;
     }
     ```
+
+## 2.2. Setup du STM32
+### Configuration du STM32
+
+## 2.3. Communication I²C
+### Primitives I²C sous STM32_HAL
+L'API HAL (Hardware Abstraction Layer) fournit par ST propose entre autres 2 primitives permettant d'interagir avec le bus I²C en mode Master:
+```c
+HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+
+HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+```
+
+où:
+
+- `I2C_HandleTypeDef hi2c` : structure stockant les informations du contrôleur I²C
+- `uint16_t DevAddress` : adresse I³C du périphérique Slave avec lequel on souhaite interagir.
+- `uint8_t *pData` : buffer de données
+- `uint16_t Size` : taille du buffer de données
+- `uint32_t Timeout` : peut prendre la valeur HAL_MAX_DELAY
