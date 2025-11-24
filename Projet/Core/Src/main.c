@@ -100,7 +100,10 @@ int main(void)
 		printf("error init\r\n");
 		Error_Handler();
 	}
+	int32_t temp100;
+	uint32_t press100;
 
+	BMP280_ReadCalibration();
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -110,6 +113,14 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+		        {
+		            printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
+		                   temp100 / 100, temp100 % 100,
+		                   press100 / 100, press100 % 100);
+		        }
+
+		        HAL_Delay(500);
 	}
 	/* USER CODE END 3 */
 }
