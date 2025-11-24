@@ -99,25 +99,25 @@ Le BMP280 est un capteur de pression et température développé par Bosch (page
 1. Liaison I²C
 
 - Utilisation de l'I²C1
-- Broches : PB8 (SCL) et PB9 (SDA)
+- Broches : `PB8 (SCL)` et `PB9 (SDA)`
 - Ces broches sont compatibles avec l'empreinte Arduino, ce qui facilite l'utilisation des capteurs externes.
 
 2. Liaison UART vers PC (USB)
 
 - Utilisation de USART2
-- Broches : PA2 (TX) et PA3 (RX)
+- Broches : `PA2 (TX)` et `PA3 (RX)`
 - Cette liaison permet de communiquer avec le PC via le port USB de la Nucleo, notamment pour afficher les données avec printf.
 
 3. Liaison UART pour communication avec Raspberry Pi (TP2)
 
 - Utilisation de l'UART4
-- Broches : PA0 (TX) et PA1 (RX)
+- Broches : `PA0 (TX)` et `PA1 (RX)`
 - Permet une communication distincte avec le Raspberry Pi.
 
 4. Liaison CAN (TP4)
 
 - Utilisation du CAN1
-- Broches : PA12 (TX) et PA11 (RX)
+- Broches : `PA12 (TX)` et `PA11 (RX)`
 
 
 ## 2.3. Communication I²C
