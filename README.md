@@ -95,6 +95,53 @@ Le BMP280 est un capteur de pression et température développé par Bosch (page
 
 ## 2.2. Setup du STM32
 ### Configuration du STM32
+On suit les instructions pour que printf envoie les caractères à l'huart2 sans oublier d'inclure stdio.h. Une fois cela fait, on choisit pour améliorer la lisibiliter et la simplicité du code de créer un driver bmp280. 
+
+On implémente d'abord les fonctions qui permettent de lire (BMP280_ReadRegisters) et d'écrire (BMP280_WriteRegister) dans les registres du capteur. 
+```c
+        // Ecrit 1 octet 'value' dans le registre 'reg'
+    HAL_StatusTypeDef BMP280_WriteRegister(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t value) {
+        uint8_t data[2] = {reg, value};
+        return HAL_I2C_Master_Transmit(hi2c, BMP280_I2C_ADDR, data, 2, HAL_MAX_DELAY);
+    }
+    
+    // Lit 'length' octets à partir du registre 'reg' dans 'buffer'
+    HAL_StatusTypeDef BMP280_ReadRegisters(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *buffer, uint16_t length) {
+        HAL_StatusTypeDef ret;
+    
+        ret = HAL_I2C_Master_Transmit(hi2c, BMP280_I2C_ADDR, &reg, 1, HAL_MAX_DELAY);
+        if (ret != HAL_OK) return ret;
+    
+        ret = HAL_I2C_Master_Receive(hi2c, BMP280_I2C_ADDR, buffer, length, HAL_MAX_DELAY);
+        return ret;
+    }
+```
+Enfin on créé une fonction BMP280_Init qu'on appellera dans le main : 
+```c
+HAL_StatusTypeDef BMP280_Init(void) {
+    uint8_t id;
+    HAL_StatusTypeDef ret;
+
+    // 1) Lecture de l'ID
+    ret = BMP280_ReadRegisters(&hi2c1, BMP280_REG_ID, &id, 1);
+    if (ret != HAL_OK) {
+        printf("Erreur lecture ID BMP280\r\n");
+        return ret;
+    }
+    printf("BMP280 ID = 0x%02X\r\n", id);
+
+    if (id != 0x58) {
+        printf("ID inattendu, ce n'est peut-être pas un BMP280\r\n");
+        return HAL_ERROR;
+    }
+    return HAL_OK;
+}
+```
+
+<img width="413" height="273" alt="1" src="https://github.com/user-attachments/assets/b6ee9c9f-4051-4d2c-9e29-bcd2c1e2056f" />
+
+0x58 est bien la valeur attendue. 
+
 
 ## 2.3. Communication I²C
 ### Primitives I²C sous STM32_HAL
