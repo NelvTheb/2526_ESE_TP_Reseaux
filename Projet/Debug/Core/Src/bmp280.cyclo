@@ -1,3 +1,3 @@
-../Core/Src/bmp280.c:6:19:BMP280_Init	2
-../Core/Src/bmp280.c:24:19:BMP280_WriteRegister	1
-../Core/Src/bmp280.c:30:19:BMP280_ReadRegisters	2
+../Core/Src/bmp280.c:6:19:BMP280_Init	6
+../Core/Src/bmp280.c:53:19:BMP280_WriteRegister	1
+../Core/Src/bmp280.c:59:19:BMP280_ReadRegisters	2
