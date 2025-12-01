@@ -7,4 +7,4 @@
 ../Core/Src/bmp280.c:141:10:bmp280_compensate_P_int32	3
 ../Core/Src/bmp280.c:175:19:BMP280_ReadTempPressInt	2
 ../Core/Src/bmp280.c:191:6:process_command	5
-../Core/Src/bmp280.c:226:6:HAL_UART_RxCpltCallback	5
+../Core/Src/bmp280.c:229:6:HAL_UART_RxCpltCallback	5
