@@ -203,6 +203,7 @@ void process_command(char *cmd)
                      temp100 / 100, temp100 % 100);
 
             HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+            HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
         }
     }
     else if (strcmp(cmd, "GET_P") == 0)
@@ -215,12 +216,14 @@ void process_command(char *cmd)
                      press100);
 
             HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+            HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
         }
     }
     else
     {
         char *err = "CMD_ERR";
         HAL_UART_Transmit(&huart4, (uint8_t*)err, strlen(err), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
     }
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
