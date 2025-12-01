@@ -336,3 +336,7 @@ Ensuite on peut utiliser `unicom` qu'on va tester avec :
 > sudo minicom -D /dev/ttyS0
 ```
 
+ <p float="left">
+<img src="https://github.com/user-attachments/assets/456fcd44-7c83-4cd8-a71a-74c49aff578d" width="48%" />
+<img src="https://github.com/user-attachments/assets/ea9fa61e-b867-47ce-b6bf-301d402c3476" width="48%" />
+</p>
