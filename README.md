@@ -333,5 +333,6 @@ On est enfin connecté donc on poursuit avec `unicom` qu'on va devoir installer 
 Ensuite on peut utiliser `unicom` qu'on va tester avec :
 
 ```bash
-minicom -D /dev/ttyAMA0
+> sudo minicom -D /dev/ttyS0
 ```
+
