@@ -368,14 +368,14 @@ hugo_cordi@PI0-HUGO-NELVEN:~ $
 ```
 ### Loopback
 
-Tout d'abord, on modifie les fichiers demandés dans la partition boot : 
+Tout d'abord, on modifie les fichiers config.txt et cmdline.txt dans la partition boot : 
 ```bash
 > ls /  #afficher tous les dossiers
 > cd /boot
 > ls  #afficher tous les fichiers
 > cd firmware
-> ls /  #afficher tous les fichiers
-> sudo nano "<nom du fichier à modifier>"
+> ls  #afficher tous les fichiers
+> sudo nano "<nom du fichier à modifier>" #nano est un éditeur de texte
 > sudo reboot #redemarrer
 ```
 
