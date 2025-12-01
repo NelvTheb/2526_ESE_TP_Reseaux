@@ -501,17 +501,23 @@ Maintenant depuis le pont ssh on peut demander via les commandes `GET_T` ou `GET
 On installe `pip` pour `python3` sur le Raspberry:
 ```bash
 > sudo apt update
+> sudo apt install python3
 > sudo apt install python3-pip
 ```
 
 On installe ensuite la bibliothèque pyserial:
 ```bash
-pip3 install pyserial
+> sudo apt install python3-serial
 ```
 
 À partir de là, la bibliothèque est accessible après: import serial.
 
-On écrit alors le code suivant :
+On créé un fichier communication_stm32.py
+```bash
+> nano communication_stm32.py
+```
+
+Dans lequel on va écrire alors le code suivant :
 
 ```py
 #!/usr/bin/env python3
@@ -564,7 +570,10 @@ if __name__ == "__main__":
         ser.close()
         print("[OK] Port série fermé.")
 ```
-
+On compile avec python3 : 
+```bash
+> python3 communication_stm32.py
+```
 Et on obtient alors :
 
 ![GET_python](./Documents/GET_python.png)
