@@ -1,4 +1,7 @@
 # TP
+### Table des matières
+
+
 
 # 1. Présentation
 Le but de cette série de TP est de mettre en place l'ensemble des composants suivant:
@@ -492,3 +495,5 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 Maintenant depuis le pont ssh on peut demander via les commandes `GET_T` ou `GET_P` :
 
 ![GET_P](./Documents/GET_P.png)
+
+## 3.3. Commande depuis Python
