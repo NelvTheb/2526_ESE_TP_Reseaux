@@ -401,3 +401,13 @@ Ensuite on peut utiliser `unicom` qu'on va tester avec :
 
 ---
 On redirige maintenant le printf sur un 2 uart qui sera relié à la `rPi 0` :
+
+J'ajoute au fichier `stm32f4xx_hal_msp.c` :
+```c
+extern UART_HandleTypeDef huart4;
+HAL_UART_Transmit(&huart4, (uint8_t *)&ch, 1, 0xFFFF);
+```
+
+Puis on ouvre le minicom et on oublie pas de relier les masses du `STM32` et `rPi0` entre elles puis on obtient :
+
+![printfrPI](./Documents/rpiprintf.png)
