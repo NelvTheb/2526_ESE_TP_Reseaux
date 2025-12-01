@@ -19,6 +19,51 @@ La première étape est de mettre en place la communication entre le microcontr�
 Le capteur comporte 2 composants I²C, qui partagent le même bus. Le STM32 jouera le rôle de Master sur le bus.
 
 Le code du STM32 sera écrit en langage C, en utilisant la bibliothèque HAL.
+
+On redirige aussi l'uart en allant dans le fichier `stm32f4xx_hal_msp.c` :
+
+```c
+void HAL_MspInit(void)
+{
+
+  /* USER CODE BEGIN MspInit 0 */
+
+  /* USER CODE END MspInit 0 */
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_0);
+
+  /* System interrupt init*/
+
+  /* USER CODE BEGIN MspInit 1 */
+
+  /* USER CODE END MspInit 1 */
+}
+
+/* USER CODE BEGIN 1 */
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART2 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+/* USER CODE END 1 */
+
+```
+
+### Branchement
+
+![PinOut](./Documents/BranchementPin.png)
+
 ## 2.1. Capteur BMP280
 Mise en œuvre du BMP280
 
@@ -342,3 +387,6 @@ Ensuite on peut utiliser `unicom` qu'on va tester avec :
 </p>
 
 ![Test](./Documents/testminicom.png)
+
+---
+On redirige maintenant le printf sur un 2 uart qui sera relié à la `rPi 0` :
