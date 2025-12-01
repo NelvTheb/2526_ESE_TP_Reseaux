@@ -302,3 +302,24 @@ if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
 Et on obtient comme résultat :
 
 ![Résultat I2C](./Documents/resultatI2C.png)
+
+---
+
+# 3. TP2 - Interfaçage STM32 - Raspberry
+## 3.2. Port Série
+### Configuration
+On flash avec `Rpi_Imager` en se activant le SSH.  
+`hostname` : PIO-HUGO-NELVEN  
+`username` : hugo_cordi  
+`mdp` : ilovelinux
+
+Ensuite dans l'invite de commande on se connecte à la Rpi0, après avoir récupéré l'adresse IP :
+```bash
+> ssh hugo_cordi@192.168.4.217
+>> key generated, enter password :
+> <mdp>
+>> connected
+hugo_cordi@PI0-HUGO-NELVEN:~ $
+```
+
+### Loopback
