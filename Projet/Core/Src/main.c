@@ -58,7 +58,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t uart4_rx;
+char command[16];
+uint8_t cmd_index = 0;
 /* USER CODE END 0 */
 
 /**
@@ -104,6 +106,7 @@ int main(void)
 	uint32_t press100;
 
 	BMP280_ReadCalibration();
+	HAL_UART_Receive_IT(&huart4, &uart4_rx, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,15 +116,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
-		        {
-		            printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
-		                   temp100 / 100, temp100 % 100,
-		                   press100 / 100, press100 % 100);
-		        }
-
-		        HAL_Delay(500);
+//		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+//		        {
+//		            printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
+//		                   temp100 / 100, temp100 % 100,
+//		                   press100 / 100, press100 % 100);
+//		        }
+//
+//		        HAL_Delay(500);
 	}
+
+
   /* USER CODE END 3 */
 }
 

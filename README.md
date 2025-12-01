@@ -411,3 +411,81 @@ HAL_UART_Transmit(&huart4, (uint8_t *)&ch, 1, 0xFFFF);
 Puis on ouvre le minicom et on oublie pas de relier les masses du `STM32` et `rPi0` entre elles puis on obtient :
 
 ![printfrPI](./Documents/rpiprintf.png)
+
+### Communication avec la STM32
+
+On active l'interruption et inclut les paramètres puis on ajoute le code suivant :
+
+```c
+// Commande rPi
+
+void process_command(char *cmd)
+{
+    int32_t temp100;
+    uint32_t press100;
+
+    if (strcmp(cmd, "GET_T") == 0)
+    {
+        if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+        {
+            char msg[16];
+            // Format demandé : T=+12.50_C sur 10 caractères
+            snprintf(msg, sizeof(msg), "T=%+02ld.%02ld_C",
+                     temp100 / 100, temp100 % 100);
+
+            HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        }
+    }
+    else if (strcmp(cmd, "GET_P") == 0)
+    {
+        if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+        {
+            char msg[16];
+            // Format : P=102300Pa (Pa = pression en Pa)
+            snprintf(msg, sizeof(msg), "P=%06luPa",
+                     press100);
+
+            HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        }
+    }
+    else
+    {
+        char *err = "CMD_ERR";
+        HAL_UART_Transmit(&huart4, (uint8_t*)err, strlen(err), HAL_MAX_DELAY);
+    }
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart == &huart4)
+    {
+        // Echo immédiat pour voir ce qu'on tape dans minicom
+        HAL_UART_Transmit(&huart4, &uart4_rx, 1, HAL_MAX_DELAY);
+
+        if (uart4_rx != '\n' && uart4_rx != '\r')
+        {
+            if (cmd_index < sizeof(command) - 1)
+            {
+                command[cmd_index++] = uart4_rx;
+            }
+        }
+        else
+        {
+            command[cmd_index] = '\0';
+
+            // On traite la commande
+            process_command(command);
+
+            // IMPORTANT : vider le buffer ! Sinon on ne peut pas faire plusieurs requêtes 
+            memset(command, 0, sizeof(command));
+
+            cmd_index = 0;
+        }
+
+        HAL_UART_Receive_IT(&huart4, &uart4_rx, 1);
+    }
+}
+```
+
+Maintenant depuis le pont ssh on peut demander via les commandes `GET_T` ou `GET_P` :
+
+![GET_P](./Documents/GET_P.png)

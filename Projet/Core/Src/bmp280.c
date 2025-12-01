@@ -1,4 +1,7 @@
 #include "bmp280.h"
+#include "usart.h"
+#include <string.h>
+#include <stdio.h>
 
 // ---- Variables globales ----
 int32_t t_fine;
@@ -16,6 +19,11 @@ int16_t  dig_P6;
 int16_t  dig_P7;
 int16_t  dig_P8;
 int16_t  dig_P9;
+
+extern UART_HandleTypeDef huart4;
+extern int cmd_index;
+extern uint8_t uart4_rx;
+extern char command[16];
 
 // ---- Fonctions I2C ----
 HAL_StatusTypeDef BMP280_WriteRegister(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t value) {
@@ -176,4 +184,72 @@ HAL_StatusTypeDef BMP280_ReadTempPressInt(int32_t* temperature_100, uint32_t* pr
     *pressure_100    = bmp280_compensate_P_int32(raw_P);
 
     return HAL_OK;
+}
+
+// Commande rPi
+
+void process_command(char *cmd)
+{
+    int32_t temp100;
+    uint32_t press100;
+
+    if (strcmp(cmd, "GET_T") == 0)
+    {
+        if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+        {
+            char msg[16];
+            // Format demandé : T=+12.50_C sur 10 caractères
+            snprintf(msg, sizeof(msg), "T=%+02ld.%02ld_C",
+                     temp100 / 100, temp100 % 100);
+
+            HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        }
+    }
+    else if (strcmp(cmd, "GET_P") == 0)
+    {
+        if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+        {
+            char msg[16];
+            // Format : P=102300Pa (Pa = pression en Pa)
+            snprintf(msg, sizeof(msg), "P=%06luPa",
+                     press100);
+
+            HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        }
+    }
+    else
+    {
+        char *err = "CMD_ERR";
+        HAL_UART_Transmit(&huart4, (uint8_t*)err, strlen(err), HAL_MAX_DELAY);
+    }
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart == &huart4)
+    {
+        // Echo immédiat pour voir ce qu'on tape dans minicom
+        HAL_UART_Transmit(&huart4, &uart4_rx, 1, HAL_MAX_DELAY);
+
+        if (uart4_rx != '\n' && uart4_rx != '\r')
+        {
+            if (cmd_index < sizeof(command) - 1)
+            {
+                command[cmd_index++] = uart4_rx;
+            }
+        }
+        else
+        {
+            command[cmd_index] = '\0';
+
+            // On traite la commande
+            process_command(command);
+
+            // IMPORTANT : vider le buffer !  Sinon on ne peut pas faire plusieurs requêtes
+            memset(command, 0, sizeof(command));
+
+            cmd_index = 0;
+        }
+
+        HAL_UART_Receive_IT(&huart4, &uart4_rx, 1);
+    }
 }
