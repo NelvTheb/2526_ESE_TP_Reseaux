@@ -321,5 +321,17 @@ Ensuite dans l'invite de commande on se connecte à la Rpi0, après avoir récup
 >> connected
 hugo_cordi@PI0-HUGO-NELVEN:~ $
 ```
-
 ### Loopback
+
+On est enfin connecté donc on poursuit avec `unicom` qu'on va devoir installer avec :
+
+```bash
+> sudo apt install unicom
+> sudo apt update
+```
+
+Ensuite on peut utiliser `unicom` qu'on va tester avec :
+
+```bash
+minicom -D /dev/ttyAMA0
+```
