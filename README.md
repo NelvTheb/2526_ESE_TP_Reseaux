@@ -781,4 +781,181 @@ def page_not_found(error):
 
 ![error404](./Documents/error404.png)
 
+Le texte vient du fichier `page_not_found.html`.
+
 ## 4.3. Nouvelles métodes HTTP
+### Méthodes POST, PUT, DELETE…
+
+Pour être encore un peu plus `RESTful`, notre application doit gérer plusieurs méthodes (verb) `HTTP`.
+
+### Méthode POST
+
+Éffectivement, quand on essaie de se connecter avec : 
+```markdown
+curl -X POST http://ip.du.pi.0/api/welcome/14
+```
+
+![failtoconnect](./Documents/failtoconnect.png)
+
+Le serveur refuse la connexion car on a pas ajouté la liste des méthodes à notre route. On va donc corriger ce problème : 
+
+
+```py
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/api/request/', methods=['GET', 'POST'])
+@app.route('/api/request/<path:path>', methods=['GET', 'POST'])
+def api_request(path=None):
+    # Récupération des arguments GET en dict (avec toutes les valeurs en liste)
+    args = request.args.to_dict(flat=False)
+
+    # Récupération des données POST selon le content-type
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json(silent=True)
+        else:
+            data = request.form.to_dict(flat=False)  # formulaire classique, toutes les valeurs
+
+    else:
+        data = None
+
+    resp = {
+        "method": request.method,
+        "url": request.url,
+        "path": path,
+        "args": args,
+        "headers": dict(request.headers),
+        "data": data,
+    }
+
+    return jsonify(resp)
+
+```
+
+Et on obtient bien une connexion que ce soit sur la Raspberry avec curl ou avec Google Chrome sur le PC. 
+
+![get](./Documents/get.png)
+
+La réponse correspond effectivement aux champs dans la barre de recherche, par exemple (avec navigateur ou curl) : 
+
+http://192.168.4.217:5000/api/request/test?foo=bar&foo=baz&num=42
+
+on voit bien qu'il ajoute comme arguments `foo` et `num` et leur ajoute respectivement `[bar,baz]` et `[42]`.
+
+### API CRUD
+
+On met en place dans `hello.py` les commandes CRUD
+
+```py
+from flask import Flask, request, jsonify, abort
+import json
+
+app = Flask(__name__)
+
+# Variable globale stockant la phrase
+welcome = "Welcome to 3ESE API!"
+
+@app.route('/welcome/', methods=['GET', 'POST', 'DELETE'])
+def welcome_collection():
+    global welcome
+
+    if request.method == 'GET':
+        # Retreave sentence
+        return jsonify({"sentence": welcome})
+
+    elif request.method == 'POST':
+        # Create / change entire sentence
+        data = request.get_json()
+        if not data or 'sentence' not in data:
+            return jsonify({"error": "Missing 'sentence' in request body"}), 400
+        welcome = data['sentence']
+        return jsonify({"message": "Sentence updated", "sentence": welcome})
+
+    elif request.method == 'DELETE':
+        # Delete entire sentence (empty string)
+        welcome = ""
+        return jsonify({"message": "Sentence deleted", "sentence": welcome})
+
+
+@app.route('/welcome/<int:index>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
+def welcome_item(index):
+    global welcome
+
+    if index < 0 or index >= len(welcome):
+        abort(404)
+
+    if request.method == 'GET':
+        # Retreave letter at position x
+        return jsonify({"index": index, "letter": welcome[index]})
+
+    elif request.method == 'PUT':
+        # Insert new word at position x
+        data = request.get_json()
+        if not data or 'word' not in data:
+            return jsonify({"error": "Missing 'word' in request body"}), 400
+        word = data['word']
+        # Insert word at index
+        welcome = welcome[:index] + word + welcome[index:]
+        return jsonify({"message": "Word inserted", "sentence": welcome})
+
+    elif request.method == 'PATCH':
+        # Change letter at position x
+        data = request.get_json()
+        if not data or 'letter' not in data:
+            return jsonify({"error": "Missing 'letter' in request body"}), 400
+        letter = data['letter']
+        if len(letter) != 1:
+            return jsonify({"error": "'letter' must be a single character"}), 400
+        welcome = welcome[:index] + letter + welcome[index+1:]
+        return jsonify({"message": "Letter updated", "sentence": welcome})
+
+    elif request.method == 'DELETE':
+        # Delete letter at position x
+        welcome = welcome[:index] + welcome[index+1:]
+        return jsonify({"message": "Letter deleted", "sentence": welcome})
+
+
+# Gestion erreur 404 avec page HTML personnalisée
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({"error": "Not found"}), 404
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+```
+
+### Test POST PUT et DELETE
+
+On `POST` une phrase :
+
+![Testphrase](./Documents/Postlaphrase.png)
+
+![AffichagePOST](./Documents/AffichagePOSTphrase.png)
+
+Ensuite on `PUT`, insère à la position `6` le mot `beautiful` (2x de suite...):
+
+![InsertWord](./Documents/InsertWORD.png)
+
+![InsertWordAffichage](./Documents/InsertWORDaffichage.png)
+
+Puis on `DELETE` lettres par lettres pour obtenir une belle phrase :
+
+![DELETE](./Documents/DELETE.png)
+
+![DELETEaffichage](./Documents/DELETEAffichage.png)
+
+
+
+
+
+
+
+
+
+
