@@ -577,3 +577,105 @@ On compile avec python3 :
 Et on obtient alors :
 
 ![GET_python](./Documents/GET_python.png)
+
+# 4. TP3 - Interface REST
+Objectif: Développement d'une interface REST sur le Raspberry
+
+## 4.1. Installation du serveur Python
+
+### Installation
+
+Création de l'utilisateur :
+
+![UserCreate](./Documents/Usercreate.png)
+
+Puis on créer un `requirement.txt` qui répertorie tous les packages nécessaires au projet.
+
+On installe les packages :
+
+![Install](./Documents/InstallPy.png)
+
+Puis on se deloggue et reloggue pour mettre à jour le PATH et permettre de lancer flask.
+
+### Premier fichier Web
+
+On créer un fichier `hello.py` :
+
+```py
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello, World!\n'
+```
+
+On le lance ensuite avec :
+
+```bash
+XXX@PIO-HUGO-NELVEN:~/XXX_server $ FLASK_APP=hello.py flask run
+```
+
+Et on teste le nouveau serveur avec la commande `curl` dans un 2e terminal
+
+```bash
+XXX@PIO-HUGO-NELVEN:~/XXX_server $ curl -s -D - http://127.0.0.1:5000
+```
+
+Le problème est que le serveur ne fonctionne pour le moment que sur la loopback. Cela est résolue avec:
+
+```bash
+XXX@PIO-HUGO-NELVEN:~/XXX_server $ FLASK_APP=hello.py flask run --host 0.0.0.0
+```
+
+![launchServeur2](./Documents/launchServeur2.png)
+![LaunchServeur](./Documents/LaunchServeur.png)
+![HelloWorld](./Documents/HelloWorld.png)
+
+Dans notre version la commande `FLASK_ENV=development` ne met plus ne mode debug donc on utilise `--debug` à la fin.
+
+![debugmode](./Documents/modeDebug.png)
+
+>[!ATTENTION]
+> On a crée notre serveur sur `ROOT` ce qui n'est pas bon en terme de sécurité donc on le déplace avec la commande `chown` :
+
+![chown](./Documents/XXXchown.png)
+
+## 4.2. Première page REST
+
+### Première route
+
+On ajoute les lignes suivantes au fichier `hello.py` :
+
+```py
+welcome = "Welcome to 3ESE API!"
+
+@app.route('/api/welcome/')
+def api_welcome():
+    return welcome
+    
+@app.route('/api/welcome/<int:index>')
+def api_welcome_index(index):
+    return welcome[index]
+```
+
+Quel est le rôle du décorateur @app.route?
+
+- Il permet de créer un fil d'Ariane (arborescence)
+
+Quel est le role du fragment <int:index>?
+
+- Parcourir la chaîne de caractères via des entiers comme indice.
+
+![Welcome](./Documents/Welcome3ESE.png)
+![Welcome](./Documents/WelcomeIndex.png)
+Le premier caractère est bien un `W` majuscule.
+
+Pour pouvoir prétendre être **RESTful**, notre serveur va devoir:
+
+- Répondre sous forme `JSON`.
+- Différencier les méthodes `HTTP`.
+
+C’est ce que nous allons voir maintenant.
+
+### Réponse JSON
