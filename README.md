@@ -636,7 +636,7 @@ Dans notre version la commande `FLASK_ENV=development` ne met plus ne mode debug
 
 ![debugmode](./Documents/modeDebug.png)
 
->[!ATTENTION]
+> [!ATTENTION]
 > On a crée notre serveur sur `ROOT` ce qui n'est pas bon en terme de sécurité donc on le déplace avec la commande `chown` :
 
 ![chown](./Documents/XXXchown.png)
@@ -679,3 +679,106 @@ Pour pouvoir prétendre être **RESTful**, notre serveur va devoir:
 C’est ce que nous allons voir maintenant.
 
 ### Réponse JSON
+
+
+On modifie `hello.py` avec :
+
+```py
+import json
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Welcome to the Arthur Nkwa fan club\n'
+welcome = "Welcome to 3ESE API!"
+
+@app.route('/api/welcome/')
+def api_welcome():
+    return welcome
+
+@app.route('/api/welcome/<int:index>')
+def api_welcome_index(index):
+   return json.dumps({"index": index, "val": welcome[index]})
+```
+
+On voit que ce n'est pas du `JSON` dans **content-type** mais du `HTML`.
+
+![HTMLcode](./Documents/HTMLcode.png)
+
+On a donc 2 solutions : 
+
+- Content-type json
+- `jsonify()`
+
+**Solution 1** :
+
+On modifie le `return` :
+
+```py
+return json.dumps({"index": index, "val": welcome[index]}), {"Content-Type": "application/json"}
+```
+
+**Solution 2** :
+
+```py
+return jsonify({
+        "index": index,
+        "val": welcome[index]
+    })
+```
+
+![JSONcode](./Documents/JSONcode.png)
+
+### Erreur 404
+
+Il arrive souvent que les URL demandées soient fausses, il faut donc que notre serveur renvoie une `erreur 404`.
+
+Il suffit de télécharger le fichiers `page_not_found.html` (en ressource) et le placer dans un nouveau répertoire `templates` (nom de chemin imposé par flask). Le plus simple pour créer ce fichier est de créer un fichier vide, puis de copier-coller son contenu.
+
+On ajoute les lignes suivantes à notre `hello.py` :
+
+```py
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
+```
+
+Et version qui renvoie sur 404 si l’index n’est pas bon :
+
+```py
+from flask import Flask, render_template, abort
+import json
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Welcome to the Arthur Nkwa fan club\n'
+
+welcome = "Welcome to 3ESE API!"
+
+@app.route('/api/welcome/')
+def api_welcome():
+    return welcome
+
+@app.route('/api/welcome/<int:index>')
+def api_welcome_index(index):
+    # Si l'index n'existe pas → page 404 personnalisée
+    if index < 0 or index >= len(welcome):
+        abort(404)
+
+    return json.dumps({
+        "index": index,
+        "val": welcome[index]
+    }), {"Content-Type": "application/json"}
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
+
+```
+
+![error404](./Documents/error404.png)
+
+## 4.3. Nouvelles métodes HTTP
