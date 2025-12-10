@@ -1,2 +1,3 @@
 ../Core/Src/driver_can.c:15:6:DRIVER_CAN_Init	8	static
 ../Core/Src/driver_can.c:33:6:DRIVER_CAN_SendAngle	16	static
+../Core/Src/driver_can.c:48:6:temp_to_angle_hot_or_cold	24	static

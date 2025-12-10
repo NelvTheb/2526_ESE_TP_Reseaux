@@ -129,10 +129,12 @@ int main(void)
 		}
 
 
-		DRIVER_CAN_SendAngle(90, POSITIVE);
-		HAL_Delay(1000);
-		DRIVER_CAN_SendAngle(90, NEGATIVE);
-		HAL_Delay(1000);
+//		DRIVER_CAN_SendAngle(90, POSITIVE);
+//		HAL_Delay(1000);
+//		DRIVER_CAN_SendAngle(90, NEGATIVE);
+//		HAL_Delay(1000);
+
+		temp_to_angle_hot_or_cold(temp100);
 
 
 	}
