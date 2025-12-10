@@ -1,0 +1,2 @@
+../Core/Src/driver_can.c:15:6:DRIVER_CAN_Init	1
+../Core/Src/driver_can.c:33:6:DRIVER_CAN_SendAngle	2
