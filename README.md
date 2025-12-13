@@ -950,12 +950,63 @@ Puis on `DELETE` lettres par lettres pour obtenir une belle phrase :
 
 ![DELETEaffichage](./Documents/DELETEAffichage.png)
 
+# 5. TP4 - Bus CAN
+
+### Objectif: Développement d'une API Rest et mise en place d'un périphérique sur bus CAN
+
+## 5.1. Pilotage du moteur
+
+On  paramètre le CAN1 pour qu'il fonctionne à 500 kbit/s :
+
+![canprog](./Documents/canprog.png)
+
+Ensuite on créer un `driver_can.c` et `driver_can.h` qui va nous servir à piloter le moteur pas à pas.
+
+On fait bien attention à vérifier si il y a une seule résistance et en bout de ligne (donc on branche à l'extremité du câble).
+
+On a alors :
+
+![GIF](./Documents/Stepper%20GIF.gif)
+
+## 5.2. Interfaçage avec le capteur
+
+En reprenant le code des TP précédents, on va faire en sorte que le mouvement du moteur soit proportionnel à la valeur du capteur pour obtenir gradation représenté par le moteur de la température mesurée par le bmp280.
+
+On créer alors la fonction suivante `temp_to_deg_hot_or_cold()` dans `driver_can.c` qui va faire tourner le stepper de manière relative aux variations de températures. Plus elles sont fortes et température croissante plus il tourne vite dans le sens horaire et quand le capteur refroidi, le stepper tourne dans le sens trigo.
+
+```c
+void temp_to_angle_hot_or_cold(int32_t temp_100){
+    static int32_t temp_init;
+    static uint8_t first_call = 1;
+
+    int32_t deg;
+
+    /* Initialisation au premier appel */
+    if (first_call)
+    {
+        temp_init = temp_100;
+        first_call = 0;
+    }
+
+	if (temp_100 > temp_init){
+		deg = (int32_t) (temp_100 - temp_init)*TEMP_MOT_COEFF;
+		deg = (deg > 180) ? 180 : deg;
+		deg = (deg < 0)   ? 0   : deg;
+		DRIVER_CAN_SendAngle(deg, POSITIVE);
+		HAL_Delay(1000);
+	}
+	else{
+		deg = (int32_t) (temp_init - temp_100)*TEMP_MOT_COEFF;
+		deg = (deg > 180) ? 180 : deg;
+		deg = (deg < 0)   ? 0   : deg;
+		DRIVER_CAN_SendAngle(deg, NEGATIVE);
+		HAL_Delay(1000);
+
+	}
+}
+```
 
 
+### Résultat
 
-
-
-
-
-
-
+![BMP+stepper](./Documents/BMP+stepper.MOV)
