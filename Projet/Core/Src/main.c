@@ -48,7 +48,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,9 +122,9 @@ int main(void)
 		/* USER CODE BEGIN 3 */
 		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
 		{
-			printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
-					temp100 / 100, temp100 % 100,
-					press100 / 100, press100 % 100);
+//			printf("Temp = %ld.%02ld °C, Press = %lu.%02lu hPa\r\n",
+//					temp100 / 100, temp100 % 100,
+//					press100 / 100, press100 % 100);
 		}
 
 

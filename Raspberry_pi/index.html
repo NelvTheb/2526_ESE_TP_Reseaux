@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>3ESE API – Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 6px 12px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        input {
+            padding: 6px;
+            width: 80px;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📡 3ESE API – Interface graphique</h1>
+
+<div class="card">
+    <h2>Température</h2>
+    <button onclick="postTemp()">POST /temp/</button>
+    <button onclick="getTemp()">GET /temp/</button><br>
+    Index : <input id="tempIndex" type="number" min="0">
+    <button onclick="getTempIndex()">GET /temp/x</button>
+    <button onclick="deleteTemp()">DELETE /temp/x</button>
+</div>
+
+<div class="card">
+    <h2>Pression</h2>
+    <button onclick="postPres()">POST /pres/</button>
+    <button onclick="getPres()">GET /pres/</button><br>
+    Index : <input id="presIndex" type="number" min="0">
+    <button onclick="getPresIndex()">GET /pres/x</button>
+    <button onclick="deletePres()">DELETE /pres/x</button>
+</div>
+
+<div class="card">
+    <h2>Scale</h2>
+    <button onclick="getScale()">GET /scale/</button><br>
+    Nouvelle scale :
+    <input id="scaleValue" type="number" step="0.1">
+    <button onclick="postScale()">POST /scale/x</button>
+</div>
+
+<div class="card">
+    <h2>Angle</h2>
+    <button onclick="getAngle()">GET /angle/</button>
+</div>
+
+<div class="card">
+    <h2>Réponse API</h2>
+    <pre id="output">En attente...</pre>
+</div>
+
+<script>
+const API = "http://192.168.4.217:5000";
+
+function show(result) {
+    document.getElementById("output").textContent =
+        JSON.stringify(result, null, 2);
+}
+
+// -------- TEMP --------
+
+function postTemp() {
+    fetch(`${API}/temp/`, { method: "POST" })
+        .then(r => r.json()).then(show);
+}
+
+function getTemp() {
+    fetch(`${API}/temp/`)
+        .then(r => r.json()).then(show);
+}
+
+function getTempIndex() {
+    const i = document.getElementById("tempIndex").value;
+    fetch(`${API}/temp/${i}`)
+        .then(r => r.json()).then(show);
+}
+
+function deleteTemp() {
+    const i = document.getElementById("tempIndex").value;
+    fetch(`${API}/temp/${i}`, { method: "DELETE" })
+        .then(r => r.json()).then(show);
+}
+
+// -------- PRES --------
+
+function postPres() {
+    fetch(`${API}/pres/`, { method: "POST" })
+        .then(r => r.json()).then(show);
+}
+
+function getPres() {
+    fetch(`${API}/pres/`)
+        .then(r => r.json()).then(show);
+}
+
+function getPresIndex() {
+    const i = document.getElementById("presIndex").value;
+    fetch(`${API}/pres/${i}`)
+        .then(r => r.json()).then(show);
+}
+
+function deletePres() {
+    const i = document.getElementById("presIndex").value;
+    fetch(`${API}/pres/${i}`, { method: "DELETE" })
+        .then(r => r.json()).then(show);
+}
+
+// -------- SCALE --------
+
+function getScale() {
+    fetch(`${API}/scale/`)
+        .then(r => r.json()).then(show);
+}
+
+function postScale() {
+    const v = document.getElementById("scaleValue").value;
+    fetch(`${API}/scale/0`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: parseFloat(v) })
+    }).then(r => r.json()).then(show);
+}
+
+// -------- ANGLE --------
+
+function getAngle() {
+    fetch(`${API}/angle/`)
+        .then(r => r.json()).then(show);
+}
+</script>
+
+</body>
+</html>

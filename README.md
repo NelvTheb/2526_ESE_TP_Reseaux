@@ -1010,3 +1010,102 @@ void temp_to_angle_hot_or_cold(int32_t temp_100){
 ### Résultat
 
 ![BMP+stepper](./Documents/BMP+stepper.MOV)
+
+
+
+# 6. TP5 - Intégration I²C - Serial - REST - CAN
+
+### Objectif: Faire marcher ensemble les TP 1, 2, 3 et 4
+
+
+Cahier des charges:
+- Mesures de température et de pression sur I²C par le STM32
+- Communication série entre la STM32 et le Raspberry PI zero: implémentation du protocole proposé au TP2.4
+- API REST sur le Raspberry:
+
+![api_rest](./Documents/api_rest_voulue.png)
+
+
+
+## 5.1. Interface Graphique
+
+Avec le navigateur Google Chrome, on peut uniquement faire des GET donc pas de POST ni de DELETE qui modifient l'état du serveur. On a donc commencé par faire une page html avec des bouttons qui nous permettra de plus facilement débugger nôtre code. 
+
+Le code de la page html est disponible [ici](/Raspberry_pi/index.html). 
+
+
+![page_html](./Documents/tp5/page_html.png)
+
+Il y a un bouton pour chaque commande, une case de formulaire pour celles qui nécessitent une valeur en entrée et une zone d'affichage en bas. 
+
+![page_html](./Documents/tp5/page_html_2.png)
+
+## 5.2. Communication entre la STM32 et la Raspberry PI0
+
+Puisqu'on a pas besoin de visualiser les trammes envoyées et reçues par UART entre la STM32 et la Raspberry PI0, on peut désactiver certaines fonctionnalités comme l'Echo et simplifier les trammes envoyées. 
+
+```c
+void process_command(char *cmd)
+{
+	int32_t temp100;
+	uint32_t press100;
+
+	if (strcmp(cmd, "GET_T") == 0)
+	{
+		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+		{
+			char msg[16];
+			// Format : 12.50 (température en °C)
+			snprintf(msg, sizeof(msg), "%02ld.%02ld",
+					temp100 / 100, temp100 % 100);
+
+			printf("Transmitted : ");
+			printf(msg);
+			printf("\r\n");
+
+
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+			//            HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
+		}
+	}
+	else if (strcmp(cmd, "GET_P") == 0)
+	{
+		if (BMP280_ReadTempPressInt(&temp100, &press100) == HAL_OK)
+		{
+			char msg[16];
+			// Format : 102300 (pression en Pa)
+			snprintf(msg, sizeof(msg), "%06lu",
+					press100);
+
+			printf("Transmitted : ");
+			printf(msg);
+			printf("\r\n");
+
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+			//            HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
+		}
+	}
+	else
+	{
+		char *err = "CMD_ERR";
+		HAL_UART_Transmit(&huart4, (uint8_t*)err, strlen(err), HAL_MAX_DELAY);
+		//        HAL_UART_Transmit(&huart4, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
+	}
+}
+```
+
+Pour le débug côté STM32, on affiche les trames reçues dans la console via un uart différent de celui consacré au Raspberry PI0. 
+
+## 5.3. Serveur Python
+
+Côté serveur Python, on fusionne ce qu'on a fait dans les TP précédents. On utilise la bibliothèque ```serial``` pour communiquer avec la STM32. La Raspberry PI0 lui envoie ```GET_T```
+
+Le code du serveur python est disponibe [ici](/Raspberry_pi/hello.py). 
+
+
+
+
+
+
+## 5.4. Validation
+
