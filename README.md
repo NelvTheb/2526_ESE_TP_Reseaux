@@ -1009,7 +1009,7 @@ void temp_to_angle_hot_or_cold(int32_t temp_100){
 
 ### Résultat
 
-![BMP+stepper](./Documents/BMP+stepperMP4.mp4)
+![BMP+stepper](./Documents/BMP+stepper.gif)
 
 
 
