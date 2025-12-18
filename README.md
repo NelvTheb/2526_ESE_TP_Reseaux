@@ -1108,4 +1108,56 @@ Le code du serveur python est disponibe [ici](/Raspberry_pi/hello.py).
 
 ## 5.4. Validation
 
-Pour éviter d'inonder le README, on peut retrouver plusieurs tests du formulaire sous forme d'images [ici](/Documents/tp5/)
+On peut retrouver plusieurs tests du formulaire sous forme d'images ci-dessous :
+
+<p float="left">
+<img src="./Documents/tp5/get_press_elt_0.PNG" width="32%" />
+<img src="./Documents/tp5/get_press_1_elt.PNG" width="32%" />
+<img src="./Documents/tp5/get_press_2_elt.PNG" width="32%" />
+</p>
+
+<table>
+  <tr>
+    <th>Méthode :</th>
+    <th>GET press</th>
+    <th>|</th>
+    <th>GET press</th>
+    <th>|</th>
+    <th>GET press</th>
+  </tr>
+</table>
+
+
+<p float="left">
+<img src="./Documents/tp5/get_press_vide.PNG" width="32%" />
+<img src="./Documents/tp5/post_press.PNG" width="32%" />
+<img src="./Documents/tp5/post_press_2.PNG" width="32%" />
+</p>
+
+<table>
+  <tr>
+    <th>Méthode :</th>
+    <th>GET press</th>
+    <th>|</th>
+    <th>POST press</th>
+    <th>|</th>
+    <th>POST press</th>
+  </tr>
+</table>
+
+<p float="left">
+<img src="./Documents/tp5/get_angle.PNG" width="32%" />
+<img src="./Documents/tp5/del_press_elt_0.PNG" width="32%" />
+<img src="./Documents/tp5/get_scale.PNG" width="32%" />
+</p>
+
+<table>
+  <tr>
+    <th>Méthode :</th>
+    <th>GET angle</th>
+    <th>|</th>
+    <th>DELETE press</th>
+    <th>|</th>
+    <th>GET scale</th>
+  </tr>
+</table>
