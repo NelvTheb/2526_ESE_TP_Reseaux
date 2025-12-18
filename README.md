@@ -1009,7 +1009,7 @@ void temp_to_angle_hot_or_cold(int32_t temp_100){
 
 ### Résultat
 
-![BMP+stepper](./Documents/BMP+stepper.MOV)
+![BMP+stepper](./Documents/BMP+stepperMP4.mp4)
 
 
 
@@ -1098,14 +1098,13 @@ Pour le débug côté STM32, on affiche les trames reçues dans la console via u
 
 ## 5.3. Serveur Python
 
-Côté serveur Python, on fusionne ce qu'on a fait dans les TP précédents. On utilise la bibliothèque ```serial``` pour communiquer avec la STM32. La Raspberry PI0 lui envoie ```GET_T```
+Côté serveur Python, nous avons fusionné les fonctionnalités développées lors des TPs précédents. La communication `UART` avec la `STM32` est réalisée à l’aide de la bibliothèque serial. Le moteur contrôlé via `CAN` est toujours branché et réagit aux changements de températures.
+
+La `Raspberry Pi Zero` agit comme intermédiaire : lorsqu’une requête `GET` est envoyée via notre API `REST`, elle transmet à la `STM32` la commande correspondante (`GET_T` pour la température ou `GET_P` pour la pression). La `STM32` renvoie alors la valeur demandée, que la `Raspberry Pi` reçoit et stocke dans une liste.
+
+Ces données peuvent ensuite être traitées et exploitées via les différentes opérations `CRUD`, soit directement depuis la barre d’adresse du navigateur, soit à l’aide de formulaires, l’option que nous avons choisie.
 
 Le code du serveur python est disponibe [ici](/Raspberry_pi/hello.py). 
-
-
-
-
-
 
 ## 5.4. Validation
 
